@@ -18,20 +18,22 @@ void VibratoFX::prepare(double theSampleRate)
 
 void VibratoFX::setDepth(float inDepth)
 {
-    // Profundidad del vibrato (modulación)
+    // Profundidad del vibrato (modulaciÃ³n)
     depth = inDepth;
 }
 
 void VibratoFX::setRate(float inRate)
 {
-    // Frecuencia de la modulación (LFO)
+    // Frecuencia de la modulaciÃ³n (LFO)
     rate = inRate;
 }
 
 void VibratoFX::process(juce::AudioBuffer<float>& buffer)
 {
+    float old_t = t; // Guarda el valor inicial de `t` antes del procesamiento de canales
     for (int channel = 0; channel < buffer.getNumChannels(); channel++)
     {
+        t = old_t;  // Restaura `t` al valor original para cada canal
         for (int i = 0; i < buffer.getNumSamples(); i++)
         {
             auto sample = buffer.getReadPointer(channel)[i];
@@ -39,11 +41,11 @@ void VibratoFX::process(juce::AudioBuffer<float>& buffer)
             // Calcula el valor del LFO para determinar el retardo
             float lfoValue = depth / 2.0f * sin(2.0 * juce::MathConstants<float>::pi * rate * t) + depth;
 
-            // Calcula el número de muestras de retardo basado en el LFO
+            // Calcula el nÃºmero de muestras de retardo basado en el LFO
             int delaySamples = static_cast<int>(std::fabs(lfoValue));
 
-            // Calcula la posición de lectura del buffer circular
-            int readerPointer = writterPointer[channel] - delaySamples;
+            // Calcula la posiciÃ³n de lectura del buffer circular
+            readerPointer = writterPointer[channel] - delaySamples;
             if (readerPointer < 0)
             {
                 readerPointer += circularBufferSize;
